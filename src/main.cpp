@@ -138,3 +138,10 @@ void erschuetterung(){
   zaehler++;
   delay(25);
 }
+
+//Ermittlung von Zufallsfaktoren
+void zufallsfaktoren() {
+  //Zufallsfaktoren zw. 0.0 und 2.0 ermitteln
+
+  zufallsfaktor[0] = (random(200)) / 100.0;
+}
