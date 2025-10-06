@@ -32,6 +32,7 @@ void setup() {
 }
 
 void loop() {
+  erschuetterung();
 }
 
 //Funktionsdefinitionen
@@ -144,4 +145,7 @@ void zufallsfaktoren() {
   //Zufallsfaktoren zw. 0.0 und 2.0 ermitteln
 
   zufallsfaktor[0] = (random(200)) / 100.0;
+  zufallsfaktor[1] = (random(200)) / 100.0;
+  zufallsfaktor[2] = (random(200)) / 100.0;
+  zufallsfaktor[3] = (random(200)) / 100.0;
 }
