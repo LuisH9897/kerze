@@ -1,10 +1,10 @@
 #include <Arduino.h>
 
 //Pinbelegung
-#define ROT = 9
-#define GRUEN = 10
-#define BLAU = 11
-#define DRAHTFALLE = 4
+const int ROT = 9;
+const int GRUEN = 10;
+const int BLAU = 11;
+const int DRAHTFALLE = 4;
 
 //Variablen
 long zaehler = 0;
@@ -16,14 +16,27 @@ float zufallsfaktor[4]; //Z0 bis Z3
 
 // Funktionsdeklarationen
 void HSV(int, double, double);
+void zufallsfaktoren();
+void erschuetterung ();
 
 void setup() {
+  pinMode(9, OUTPUT);
+  pinMode(10, OUTPUT);
+  pinMode(11, OUTPUT);
+
+  pinMode(DRAHTFALLE, INPUT_PULLUP);
+
+  erschuetterung_status = digitalRead(DRAHTFALLE);
+
+  randomSeed(analogRead(A0));
 }
 
 void loop() {
 }
 
 //Funktionsdefinitionen
+
+//HSV-Farbenraum
 void HSV(int H, double S, double V) {
   //Hier machen wir uns den HSV-Farbraum zunutze. Der entsprechende Algorithmus ist im Internet zu finden.
 
@@ -79,4 +92,49 @@ void HSV(int H, double S, double V) {
   analogWrite(ROT, rot);
   analogWrite(GRUEN, gruen);
   analogWrite(BLAU, blau);
+}
+
+//Erschuetterungserkennung
+void erschuetterung(){
+  if (digitalRead(DRAHTFALLE) != erschuetterung_status) {
+    erschuetterung_status = !erschuetterung_status;
+    erschuetterung_zaehler +=100;
+  }
+
+  if (erschuetterung_zaehler > 300) {
+    betriebsart = (betriebsart + 1) %4;
+    erschuetterung_zaehler = 0;
+  }
+
+  if (betriebsart == 0) { //Alles ist aus
+    analogWrite(ROT, 0);
+    analogWrite(GRUEN, 0);
+    analogWrite(BLAU, 0);
+  }
+
+  if(betriebsart == 1) {  //Kerzenflackern
+    helligkeit = zufallsfaktor[0] * sin(zaehler*0.02)
+    + zufallsfaktor[1] * sin(zaehler*0.03)
+    + zufallsfaktor[2] * sin(zaehler*0.07)
+    + zufallsfaktor[3] * sin(zaehler*0.11);
+
+    int rot = map(helligkeit * 100, -200, 200, 5, 255);
+    int gruen = map(helligkeit * 100, -200, 200, 1, 255);
+
+    analogWrite(ROT, constrain(rot, 5, 255));
+    analogWrite(GRUEN, constrain (gruen, 1, 100));
+
+    if (zaehler % 1000 ==0) {zufallsfaktoren();} //nach ca. 25 Sek.neue Zufallsfaktoren ermitteln
+  }
+
+  if (betriebsart == 2) {HSV(zaehler%360, 1, 1);} //Party-Modus bei voller Saettigung (1) und voller Helligkeit (1)
+
+  if (betriebsart ==3) {  //dauerhaft weiss
+    analogWrite(ROT, 255);
+    analogWrite(GRUEN, 255);
+    analogWrite(BLAU, 255);
+  }
+
+  zaehler++;
+  delay(25);
 }
